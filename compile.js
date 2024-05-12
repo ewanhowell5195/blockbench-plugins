@@ -1,15 +1,41 @@
 const fs = require("node:fs")
 
-async function run() {
+const loadedPlugins = {}
+
+const ignore = ["geenium_bedrock_entity_helper"]
+
+function run() {
+  const plugins = JSON.parse(fs.readFileSync("plugins.json"))
   for (const file of fs.readdirSync("plugins")) {
     if (file.startsWith("_")) continue
-    if (file.endsWith(".js")) await import(`./plugins/${file}`)
-    else await import(`./plugins/${file}/${file}.js`)
+    if (file.endsWith(".js")) require(`./plugins/${file}`)
+    else require(`./plugins/${file}/${file}.js`)
   }
+  setTimeout(() => {
+    const processed = []
+    for (const [id, data] of Object.entries(loadedPlugins)) {
+      processed.push(id)
+      plugins[id] ??= {}
+      for (const key of Object.keys(plugins[id])) {
+        delete plugins[id][key]
+      }
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value !== "function") {
+          plugins[id][key] = value
+        }
+      }
+    }
+    for (const id of Object.keys(plugins)) {
+      if (!processed.includes(id) && !ignore.includes(id)) {
+        delete plugins[id]
+      }
+    }
+    fs.writeFileSync("plugins.json", JSON.stringify(plugins, null, 2))
+  }, 100)
 }
 
 function register(id, data) {
-  console.log(id, data)
+  loadedPlugins[id] = data
 }
 
 globalThis.Plugin = { register }
@@ -99,7 +125,20 @@ globalThis.Blockbench = {
 }
 
 globalThis.indexedDB = {
-  open: () => ({})
+  open: () => {
+    const request = {}
+    setTimeout(() => {
+      request.result = {
+        transaction: () => ({
+          objectStore: () => ({
+            getAll: () => ({})
+          })
+        })
+      }
+      request.onsuccess()
+    }, 0)
+    return request
+  }
 }
 
 globalThis.Canvas = {
