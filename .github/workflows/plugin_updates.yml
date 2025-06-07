@@ -6,7 +6,7 @@ on:
 
 jobs:
   generate-updates:
-    if: github.repository == 'JannisX11/blockbench-plugins'
+    if: github.repository == 'ewanhowell5195/blockbench-plugins'
     runs-on: ubuntu-latest
 
     steps:
