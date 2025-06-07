@@ -18,7 +18,7 @@ jobs:
 
       - name: Generate updates.json
         working-directory: build
-        run: node build/update_plugin_updates.mjs
+        run: node update_plugin_updates.mjs
 
       - name: Commit and push updates.json
         run: |
