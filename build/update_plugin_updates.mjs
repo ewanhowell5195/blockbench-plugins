@@ -26,11 +26,15 @@ for (const [id, data] of Object.entries(plugins)) {
   const [nMaj, nMin, nPatch] = data.version.split(".").map(Number)
 
   const wentDown = nMaj < oMaj || (nMaj === oMaj && nMin < oMin) || (nMaj === oMaj && nMin === oMin && nPatch < oPatch)
-  const patchIncreased = nMaj === oMaj && nMin === oMin && nPatch > oPatch
+  const onlyPatchChanged = nMaj === oMaj && nMin === oMin && nPatch !== oPatch
+
+  if (onlyPatchChanged) {
+    continue
+  }
 
   updates[id].version = data.version
 
-  if (wentDown || patchIncreased) {
+  if (wentDown) {
     continue
   }
 
